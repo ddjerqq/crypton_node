@@ -92,27 +92,6 @@ impl<'a> Block<'a> {
 
         buffer
     }
-
-    pub fn mine(&mut self) {
-        let mut buffer = self.get_payload();
-
-        loop {
-            // hash
-            buffer[88..96].copy_from_slice(&self.nonce.to_be_bytes());
-            let hash = sha256::hash(buffer);
-
-            let is_valid = hash.iter()
-                .take(self.difficulty as usize)
-                .all(|b| *b == 0u8);
-
-            if is_valid {
-                break;
-            }
-
-            // increment
-            self.nonce += 1;
-        }
-    }
 }
 
 impl<'a> Debug for Block<'a> {
@@ -132,42 +111,11 @@ impl<'a> Debug for Block<'a> {
 
 #[cfg(test)]
 mod tests {
-    use std::time::Instant;
-    use crate::wallet::Wallet;
     use super::*;
 
     #[test]
     fn test_block_hash() {
-        let mut block = Block::genesis();
-        block.difficulty = 2;
-
-        let start = Instant::now();
-        block.mine();
-        let elapsed = start.elapsed();
-        println!("{:?}", elapsed);
-
-        println!("{:#?}", block);
-    }
-
-    #[test]
-    fn test_custom_block() {
-        let mut block = Block::genesis();
-        block.difficulty = 2;
-
-        let start = Instant::now();
-        block.mine();
-        let elapsed = start.elapsed();
-        println!("{:?}", elapsed);
-
-        let alice = Wallet::from_passphrase("alice");
-        let bob = Wallet::from_passphrase("bob");
-
-        for i in 0..1024 {
-            let txn = Transaction::new(&alice, &bob, i, 1);
-            block.add_transaction(&txn);
-        }
-        block.mine();
-
+        let block = Block::genesis();
         println!("{:#?}", block);
     }
 }
