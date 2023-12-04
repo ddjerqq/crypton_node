@@ -1,9 +1,7 @@
-use std::time::Instant;
-use once_cell::sync::Lazy;
-use crate::block::Block;
-use crate::miner::mine;
-use crate::transaction::Transaction;
-use crate::wallet::Wallet;
+use std::env::args;
+use std::str::from_utf8;
+use std::thread;
+use std::time::Duration;
 
 mod transaction;
 mod wallet;
@@ -12,29 +10,37 @@ mod block;
 mod parallel_miner;
 mod util;
 mod miner;
+mod peer;
 
-static ALICE: Lazy<Wallet> = Lazy::new(|| Wallet::from_passphrase("alice"));
-static BOB: Lazy<Wallet> = Lazy::new(|| Wallet::from_passphrase("bob"));
+fn server() {
+    let server = peer::Server::bind("localhost:3333").unwrap();
+    println!("Server listening on port 3333");
+    server.listen().unwrap();
+}
 
-fn add_transactions(block: &mut Block) {
-    for i in 0..1024 {
-        let txn = Transaction::new(&ALICE, &BOB, i, 1);
-        block.add_transaction(&txn);
+fn client() {
+    let mut client = peer::Client::connect("localhost:3333").unwrap();
+    println!("Client connected to port 3333");
+
+    loop {
+        println!("sending hello");
+        client.write(b"hello").unwrap();
+
+        let buffer = client.read().unwrap();
+        println!("receiving from server: {:?}", from_utf8(&buffer));
+
+        println!("sleeping");
+        thread::sleep(Duration::from_secs(1));
     }
 }
 
 fn main() {
-    let mut block = Block::genesis();
-    block.difficulty = 3;
+    let mut args = args();
+    let is_server = args.any(|arg| arg == "-server");
 
-    for _ in 0..100 {
-        add_transactions(&mut block);
-
-        let start = Instant::now();
-        mine(&mut block);
-        println!("{:#?}", block);
-        println!("elapsed {:?}\n", start.elapsed());
-
-        block = block.next();
+    if is_server {
+        server();
+    } else {
+        client();
     }
 }
