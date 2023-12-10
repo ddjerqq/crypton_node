@@ -1,5 +1,5 @@
 use crate::crypto::sha256;
-use crate::crypto::hex::encode;
+use hex::encode;
 use std::fmt::{Debug, Formatter};
 use secp256k1::{All, Message};
 use secp256k1::ecdsa::Signature;

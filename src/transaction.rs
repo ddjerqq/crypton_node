@@ -2,7 +2,7 @@ use std::fmt::{Debug, Formatter};
 use std::time::UNIX_EPOCH;
 use secp256k1::ecdsa::Signature;
 use secp256k1::Message;
-use crate::crypto::{hex, sha256};
+use crate::crypto::sha256;
 use crate::wallet::Wallet;
 
 const PAYLOAD_SIZE: usize = 112;

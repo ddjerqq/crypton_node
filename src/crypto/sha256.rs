@@ -1,4 +1,4 @@
-use crate::crypto::hex;
+use hex::encode;
 use sha2::{Sha256, Digest};
 
 pub fn hash<T: AsRef<[u8]>>(data: T) -> [u8; 32] {
@@ -13,7 +13,7 @@ pub fn hash<T: AsRef<[u8]>>(data: T) -> [u8; 32] {
 }
 
 pub fn digest(hash: &[u8; 32]) -> String {
-    hex::encode(hash)
+    encode(hash)
 }
 
 #[cfg(test)]
@@ -26,7 +26,7 @@ mod tests {
         let expected = "9834876dcfb05cb167a5c24953eba58c4ac89b1adf57f28f2f9d09af107ee8f0";
 
         let hash = hash(data.as_bytes());
-        let hash_hex = hex::encode(&hash);
+        let hash_hex = encode(&hash);
 
         assert_eq!(hash_hex, expected);
     }
